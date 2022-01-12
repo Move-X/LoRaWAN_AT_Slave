@@ -12,8 +12,9 @@ This FW example permits to interface with the LoRaWAN® to manage LoRa® wireles
 This FW can be:
 - the starting point of any more complex project;
 - used for validating a node or an external application; 
-- tried **JUST FOR FUN** :smile:. 
+- tried **JUST FOR FUN** :smile:.
 ​
+
 The FW explained in this note is the **1.0 version**.
 ​
 ### Release and debug mode
@@ -65,8 +66,8 @@ Here are the list of AT commands implemented in this FW version, together with t
 In the official documentation there are exhaustive examples and some relevant screenshots.
 ​
 ## REFERENCE DOCUMENTS
-1. [FW Documentation]()
-2. [MAMWLExx Module] (https://www.move-x.it/mamwle-module/)
+1. [FW Documentation](https://www.move-x.it/wp-content/uploads/2022/01/MAMWLE-FW-AT-Command-Document.docx.pdf)
+2. [MAMWLExx Module](https://www.move-x.it/mamwle-module/)
 3. [LoRaWAN 1.0.3 Specification by LoRa Alliance® Specification Protocol – 2018, January](https://lora-alliance.org/resource_hub/lorawan-specification-v1-0-3/)
 4. [Application note How to build a LoRa application with STM32CubeWL (AN5406)](https://www.st.com/resource/en/application_note/an5406-how-to-build-a-lora-application-with-stm32cubewl-stmicroelectronics.pdf)
 5. [User manual Description of STM32WL HAL and low-layer drivers (UM2642)](https://www.st.com/resource/en/user_manual/dm00660673-description-of-stm32wl-hal-and-lowlayer-drivers-stmicroelectronics.pdf)
@@ -75,5 +76,4 @@ In the official documentation there are exhaustive examples and some relevant sc
 8. [LoRa alliance certification deepening](https://lora-alliance.org/wp-content/uploads/2020/11/lora_alliance_certification_deep_dive.pdf)
 ​
 ## ACKNOWLEDGMENTS
-​
 * This FW is an improved version of an example of LoRaWAN® application present in the STM32CubeWL (STM32Cube MCU Package for STM32WL series), [v1.1](https://www.st.com/content/my_st_com/en/products/embedded-software/mcu-mpu-embedded-software/stm32-embedded-software/stm32cube-mcu-mpu-packages/stm32cubewl.license=1639757194897.product=STM32CubeWL.version=1.1.0.html).
