@@ -1,4 +1,4 @@
-# LoRaWAN® end-device example project, v1.0
+# LoRaWAN® end-device example project, v1.1
 ​
 ![Alt text](/Docs/move-x_logo.png?raw=true)
     
@@ -8,13 +8,13 @@ The aim of this project is to show an example of an end-device LoRaWAN® stack i
 ​
 ### Introduction
 ​
-This FW example permits to interface with the LoRaWAN® to manage LoRa® wireless link via AT commands or with ANY microprocessor or microcontroller via serial interface. The LoRaWAN® bands compliant with this FW are the **EU868, AU915 and US915**, while the classes admitted are **A** and **C**. In the official documentation are listed all the characteristics of this code, like the admitted microcontrollers (**STM32WLE5JB** and **STM32WLE5JC**), power consumptions (only **2uA** in sleep mode, class C), memory occupation (**79.92 KB** and **99.73 KB** respectively in release and debug modes), a brief guide on how to set serial communication with the microcontrollers and how to import this project into STM32CubeIDE (proprietary IDE of STMicroelectronics). 
+This FW example permits to interface with the LoRaWAN® to manage LoRa® wireless link via AT commands or with ANY microprocessor or microcontroller via serial interface. The LoRaWAN® bands compliant with this FW are the **EU868, AU915 and US915**, while the classes admitted are **A** and **C**. In the official documentation are listed all the characteristics of this code, like the admitted microcontrollers (**STM32WLE5JB** and **STM32WLE5JC**), power consumptions (only **2uA** in sleep mode, class C), memory occupation (**80.05 KB** and **100.05 KB** respectively in release and debug modes), a brief guide on how to set serial communication with the microcontrollers and how to import this project into STM32CubeIDE (proprietary IDE of STMicroelectronics). 
 This FW can be:
 - the starting point of any more complex project;
 - used for validating a node or an external application; 
 - tried **JUST FOR FUN** :smile:.
 ​
-The FW explained in this note is the **1.0 version**.
+The FW explained in this note is the **1.1 version**.
 ​
 ### Release and debug mode
 ​
@@ -69,7 +69,7 @@ In the official documentation there are exhaustive examples and some relevant sc
 Inside "serial_example" folder you can find an example of serial communication with a board (keys and parameters, like serial port and others, must be set by the user). The example permits to make a join, configure send' parameters and transmits a dummy payload (2 bytes set to 1).
 ​
 ## REFERENCE DOCUMENTS
-1. [FW Documentation](https://www.move-x.it/wp-content/uploads/2022/01/MAMWLE-FW-AT-Command-Document.docx.pdf)
+1. [FW Documentation](https://github.com/Move-X/LoRaWAN_AT_Slave/blob/main/Docs/MAMWLE%20FW%20-%20AT%20Command%20Document.pdf)
 2. [MAMWLExx Module](https://www.move-x.it/mamwle-module/)
 3. [LoRaWAN 1.0.3 Specification by LoRa Alliance® Specification Protocol – 2018, January](https://lora-alliance.org/resource_hub/lorawan-specification-v1-0-3/)
 4. [Application note How to build a LoRa application with STM32CubeWL (AN5406)](https://www.st.com/resource/en/application_note/an5406-how-to-build-a-lora-application-with-stm32cubewl-stmicroelectronics.pdf)
