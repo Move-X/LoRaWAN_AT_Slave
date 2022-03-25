@@ -539,6 +539,7 @@ void LmHandlerProcess( void )
     }
     mac_send = false;
     is_rx2_elapsed = false;
+    rx2_already_closed = false;
 }
 
 void LmHandlerJoin( ActivationType_t mode )

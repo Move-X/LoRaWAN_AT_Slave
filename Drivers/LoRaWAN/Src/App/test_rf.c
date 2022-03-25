@@ -96,7 +96,6 @@ static RadioEvents_t RadioEvents;
 /*!
  * Radio test payload pointer
  */
-static uint8_t payload[256] = {0};
 
 /* USER CODE BEGIN PV */
 
@@ -107,7 +106,7 @@ static uint8_t payload[256] = {0};
 /*!
  * \brief Generates a PRBS9 sequence
  */
-static int32_t Prbs9_generator(uint8_t *payload, uint8_t len);
+// static int32_t Prbs9_generator(uint8_t *payload, uint8_t len);
 /*!
  * \brief Function to be executed on Radio Tx Done event
  */
@@ -268,7 +267,7 @@ int32_t TST_stop(void)
   /* USER CODE END TST_stop_2 */
 }
 
-int32_t TST_TX_Start(int32_t nb_packet)
+int32_t TST_TX_Start(int32_t nb_packet, uint8_t *payload)
 {
   /* USER CODE BEGIN TST_TX_Start_1 */
 
@@ -291,8 +290,6 @@ int32_t TST_TX_Start(int32_t nb_packet)
     RadioEvents.RxTimeout = OnRxTimeout;
     RadioEvents.RxError = OnRxError;
     Radio.Init(&RadioEvents);
-    /*Fill payload with PRBS9 data*/
-    Prbs9_generator(payload, testParam.payloadLen);
 
     /* Launch several times payload: nb times given by user */
     for (i = 1; i <= nb_packet; i++)
@@ -498,7 +495,7 @@ int32_t TST_RX_Start(int32_t nb_packet)
       {
         count_RxKo++;
       }
-      if (RadioRxDone_flag == 1)
+      else if (RadioRxDone_flag == 1)
       {
         count_RxOk++;
       }
@@ -551,8 +548,48 @@ void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t LoraSnr_FskC
   /* USER CODE BEGIN OnRxDone_1 */
 
   /* USER CODE END OnRxDone_1 */
+  uint8_t app, app2; 
+
   last_rx_rssi = rssi;
   last_rx_LoraSnr_FskCfo = LoraSnr_FskCfo;
+
+  if(size == 1)
+  {
+	  app = payload[0];
+	  app2 = payload[0];
+	  app2 = (app & 0xF0) >> 4;
+	  app = app & 0x0F;
+	  #ifndef PRINT_RELEASE
+	  	  APP_TPRINTF("payload = %X%X\r\n\r\n", app2, app);
+	  #else
+	  	  APP_TPRINTF("%X%X\r\n\r\n", app2, app);
+	  #endif
+  }
+  else
+  {
+	  app = payload[0];
+	  app2 = payload[0];
+	  app2 = (app & 0xF0) >> 4;
+	  app = app & 0x0F;
+	  #ifndef PRINT_RELEASE
+	  	  APP_TPRINTF("payload = %X%X:", app2, app);
+	  #else
+	  	  APP_TPRINTF("%X%X:", app2, app);
+	  #endif
+	  for(uint8_t i = 1; i<size-1; i++)
+	  {
+		  app = payload[i];
+		  app2 = payload[i];
+		  app2 = (app & 0xF0) >> 4;
+		  app = app & 0x0F;
+		  APP_TPRINTF("%X%X:", app2, app);
+	  }
+	  app = payload[size-1];
+	  app2 = payload[size-1];
+	  app2 = (app & 0xF0) >> 4;
+	  app = app & 0x0F;
+	  APP_TPRINTF("%X%X\r\n", app2, app);
+  }
 
   /* Set Rxdone flag */
   RadioRxDone_flag = 1;
@@ -601,27 +638,27 @@ void OnRxError(void)
   /* USER CODE END OnRxError_2 */
 }
 
-static int32_t Prbs9_generator(uint8_t *payload, uint8_t len)
-{
-  /* USER CODE BEGIN Prbs9_generator_1 */
+// static int32_t Prbs9_generator(uint8_t *payload, uint8_t len)
+// {
+//   /* USER CODE BEGIN Prbs9_generator_1 */
 
-  /* USER CODE END Prbs9_generator_1 */
-  uint16_t prbs9_val = PRBS9_INIT;
-  /*init payload to 0*/
-  UTIL_MEM_set_8(payload, 0, len);
+//   /* USER CODE END Prbs9_generator_1 */
+//   uint16_t prbs9_val = PRBS9_INIT;
+//   /*init payload to 0*/
+//   UTIL_MEM_set_8(payload, 0, len);
 
-  for (int32_t i = 0; i < len * 8; i++)
-  {
-    /*fill buffer with prbs9 sequence*/
-    int32_t newbit = (((prbs9_val >> 8) ^ (prbs9_val >> 4)) & 1);
-    prbs9_val = ((prbs9_val << 1) | newbit) & 0x01ff;
-    payload[i / 8] |= ((prbs9_val & 0x1) << (i % 8));
-  }
-  return 0;
-  /* USER CODE BEGIN Prbs9_generator_2 */
+//   for (int32_t i = 0; i < len * 8; i++)
+//   {
+//     /*fill buffer with prbs9 sequence*/
+//     int32_t newbit = (((prbs9_val >> 8) ^ (prbs9_val >> 4)) & 1);
+//     prbs9_val = ((prbs9_val << 1) | newbit) & 0x01ff;
+//     payload[i / 8] |= ((prbs9_val & 0x1) << (i % 8));
+//   }
+//   return 0;
+//   /* USER CODE BEGIN Prbs9_generator_2 */
 
-  /* USER CODE END Prbs9_generator_2 */
-}
+//   /* USER CODE END Prbs9_generator_2 */
+// }
 
 /* USER CODE BEGIN PrFD */
 

@@ -4,7 +4,7 @@
     
 ## AT DOCUMENTATION
 ​
-The aim of this project is to show an example of an end-device LoRaWAN® stack implementation with particular AT Commands.
+The aim of this project is to show an example of an end-device LoRaWAN® stack implementation with particular AT Commands. 
 ​
 ### Introduction
 ​
@@ -14,7 +14,6 @@ This FW can be:
 - used for validating a node or an external application; 
 - tried **JUST FOR FUN** :smile:.
 ​
-
 The FW explained in this note is the **1.0 version**.
 ​
 ### Release and debug mode
@@ -60,10 +59,14 @@ Here are the list of AT commands implemented in this FW version, together with t
 - AT+BAT=? 
 - AT+TTH=Start frequency:Stop frequency:frequency resolution:number of packets to send 
 - AT+TCONF=TX frequency:TX power:BW:SF:4/CR:LNA state:Boost PA state:Modulation type:Payload length:Low DR optimization:BT FSK product 
-- AT+TTX=Send’s number:Channel frequency:Spreading Factor:BW 
-- AT+TRX=Packet’s number to receive:Channel frequency:Spreading Factor:BW
+- AT+TTX=Send’s number:Channel frequency:Spreading Factor:BW:Payload Length:Payload 
+- AT+TRX=Packet’s number to receive:Channel frequency:Spreading Factor:BW 
 ​
 In the official documentation there are exhaustive examples and some relevant screenshots.
+
+## SERIAL EXAMPLE
+
+Inside "serial_example" folder you can find an example of serial communication with a board (keys and parameters, like serial port and others, must be set by the user). The example permits to make a join, configure send' parameters and transmits a dummy payload (2 bytes set to 1).
 ​
 ## REFERENCE DOCUMENTS
 1. [FW Documentation](https://www.move-x.it/wp-content/uploads/2022/01/MAMWLE-FW-AT-Command-Document.docx.pdf)

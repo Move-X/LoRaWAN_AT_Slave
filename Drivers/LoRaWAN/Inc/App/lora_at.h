@@ -650,6 +650,7 @@ extern uint8_t flag_channel_AU;
 extern uint8_t flag_channel_US;
 extern bool send_already_done;
 extern bool is_rx2_elapsed;
+extern bool rx2_already_closed;
 extern bool mac_send;
 extern bool Send_test;
 

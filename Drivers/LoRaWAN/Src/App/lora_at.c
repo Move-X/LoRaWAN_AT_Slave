@@ -71,6 +71,7 @@ UTIL_TIMER_Object_t Tx_Data;
 bool Send_test = false;
 bool mac_send = false;
 bool is_rx2_elapsed = false;
+bool rx2_already_closed = false;
 bool send_already_done = false;
 //INITIAL CSEND
 uint32_t number_send_ok = 0;
@@ -359,7 +360,7 @@ ATEerror_t AT_verbose_set(const char *param)
 	int32_t TimeStampVar;
 
 	/* read and set the verbose level */
-	if (2 != tiny_sscanf(buf, "%u:%u", &lvl_nb,&TimeStampVar))
+	if (2 != tiny_sscanf(buf, "%lu:%lu", &lvl_nb,&TimeStampVar))
 	{
 		#ifndef PRINT_RELEASE
 			AT_PRINTF("AT+VL: verbose level is not well set\r\n");
@@ -494,12 +495,7 @@ ATEerror_t AT_NwkKey_set(const char *param)
 
 	/* USER CODE END AT_NwkKey_set_1 */
 	uint8_t nwk_key[16];
-
-	if (tiny_sscanf(param, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
-				  &nwk_key[0], &nwk_key[1], &nwk_key[2], &nwk_key[3],
-				  &nwk_key[4], &nwk_key[5], &nwk_key[6], &nwk_key[7],
-				  &nwk_key[8], &nwk_key[9], &nwk_key[10], &nwk_key[11],
-				  &nwk_key[12], &nwk_key[13], &nwk_key[14], &nwk_key[15]) != 16)
+	if (sscanf_16_hhx(param, nwk_key) != 16)
 	{
 		return AT_ERROR;
 	}
@@ -547,11 +543,7 @@ ATEerror_t AT_AppKey_set(const char *param)
 
 	/* USER CODE END AT_AppKey_set_1 */
 	uint8_t appKey[16];
-	if (tiny_sscanf(param, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
-				  &appKey[0], &appKey[1], &appKey[2], &appKey[3],
-				  &appKey[4], &appKey[5], &appKey[6], &appKey[7],
-				  &appKey[8], &appKey[9], &appKey[10], &appKey[11],
-				  &appKey[12], &appKey[13], &appKey[14], &appKey[15]) != 16)
+	if (sscanf_16_hhx(param, appKey) != 16)
 	{
 		return AT_ERROR;
 	}
@@ -1274,9 +1266,9 @@ ATEerror_t AT_version_get(const char *param)
 	/* USER CODE END AT_version_get_1 */
 
 	#ifndef PRINT_RELEASE
-		AT_PRINTF("FW_VERSION:1.0\r\n");
+		AT_PRINTF("FW_VERSION:1.1\r\n");
 	#else
-		AT_PRINTF("VER:1.0\r\n");
+		AT_PRINTF("VER:1.1\r\n");
 	#endif
 
 	/* Get LoRa APP version*/
@@ -1365,7 +1357,7 @@ ATEerror_t AT_DataRate_set(const char *param)
 	/* USER CODE BEGIN AT_DataRate_set_1 */
 
 	/* USER CODE END AT_DataRate_set_1 */
-//	LoRaMacRegion_t region;
+
 	if (tiny_sscanf(param, "%hhu", &datarate) != 1)
 	{
 		return AT_ERROR;
@@ -1588,7 +1580,7 @@ ATEerror_t AT_Region_set(const char *param)
 	/* USER CODE BEGIN AT_Region_set_1 */
 
 	/* USER CODE END AT_Region_set_1 */
-//	LoRaMacRegion_t region;
+
 	if (tiny_sscanf(param, "%hhu", &region) != 1)
 	{
 		return AT_ERROR;
@@ -1710,7 +1702,9 @@ ATEerror_t AT_DeviceClass_set(const char *param)
 		}
 		break;
 	case 'C':
+		is_rx2_elapsed = false;
 		errorStatus = LmHandlerRequestClass(CLASS_C);
+		is_rx2_elapsed = false;
 		break;
 	default:
 		return AT_ERROR;
@@ -2191,7 +2185,7 @@ ATEerror_t AT_Send(const char *param)
 	}
 
 	/* read and set the payload length */
-	if (1 != tiny_sscanf(buf, "%u:", &payload_length))
+	if (1 != tiny_sscanf(buf, "%lu:", &payload_length))
 	{
 		#ifndef PRINT_RELEASE
 			AT_PRINTF("AT+SEND without the payload length\r\n");
@@ -2270,14 +2264,14 @@ ATEerror_t AT_Send(const char *param)
 ATEerror_t AT_ConfigSend_get(const char *param)
 {
 	#ifndef PRINT_RELEASE
-	AT_PRINTF("Settings: Port = %d | Number of packet send = %u | ACK = %d | "
-				"Send timer = %u | Data rate = %d | Power level = %d"
+	AT_PRINTF("Settings: Port = %u | Number of packet send = %u | ACK = %u | "
+				"Send timer = %u | Data rate = %u | Power level = %u"
 				" | Maximum size of packages = %u Bytes\r\n",port_tx,number_of_send,ACK_value,send_timer,
 				datarate,txPower,payload_length_max);
-	AT_PRINTF("\r\ncan be copy/paste in set cmd: AT+CFGSEND=%d:%d:%d:%d:%d:%d\r\n",
+	AT_PRINTF("\r\ncan be copy/paste in set cmd: AT+CFGSEND=%u:%u:%u:%u:%u:%u\r\n",
 				port_tx,number_of_send,ACK_value,send_timer,datarate,txPower);
 	#else
-	AT_PRINTF("%d:%u:%d:%u:%u:%d:%d\r\n",
+	AT_PRINTF("%d:%d:%d:%u:%u:%d:%d\r\n",
 			port_tx,number_of_send,ACK_value,send_timer,payload_length_max,datarate,txPower);
 	#endif
 	return AT_OK;
@@ -2300,7 +2294,7 @@ ATEerror_t AT_ConfigSend_set(const char *param)
 	}
 
 	// Check if the command format is right
-	if (6 != tiny_sscanf(param, "%u:%u:%u:%u:%u:%u",
+	if (6 != tiny_sscanf(param, "%lu:%lu:%lu:%lu:%hhd:%lu",
 			&port_tx,
 			&number_of_send,
 			&ACK_value,
@@ -2309,7 +2303,7 @@ ATEerror_t AT_ConfigSend_set(const char *param)
 			&txPower))
 	{
 		#ifndef PRINT_RELEASE
-			AT_PRINTF("AT+SEND without the application port\r\n");
+			AT_PRINTF("Wrong number of parameters\r\n");
 		#endif
 		return AT_ERROR;
 	}
@@ -2322,10 +2316,10 @@ ATEerror_t AT_ConfigSend_set(const char *param)
 		return AT_ERROR;
 	}
 
-    if (number_of_send <= 0 || number_of_send > 0x7FFFFFFF)
+    if (number_of_send < 1 || number_of_send > 0x7FFFFFFF)
     {
 		#ifndef PRINT_RELEASE
-    		AT_PRINTF("Wrong number of send \r\n");
+    		AT_PRINTF("Wrong number of send\r\n");
 		#endif
     	return AT_ERROR;
     }
@@ -2838,7 +2832,7 @@ ATEerror_t AT_Cw_set(const char *param)
     switch(region)
 	{
 		case LORAMAC_REGION_EU868:
-			if (power < 0 || power > 7)
+			if (power < 2 || power > 16)
 			{
 				#ifndef PRINT_RELEASE
 					AT_PRINTF("Wrong power level \r\n");
@@ -2848,7 +2842,7 @@ ATEerror_t AT_Cw_set(const char *param)
 			break;
 
 		case LORAMAC_REGION_US915:
-		    if (power < 0 || power > 14)
+		    if (power < 2 || power > 30) //22dBm is the board maximum power so if greater the power inserted will be overwrited to this value
 			{
 				#ifndef PRINT_RELEASE
 					AT_PRINTF("Wrong power level \r\n");
@@ -2858,7 +2852,7 @@ ATEerror_t AT_Cw_set(const char *param)
 			break;
 
 		case LORAMAC_REGION_AU915:
-		    if (power < 0 || power > 14)
+		    if (power < 2 || power > 30)
 			{
 				#ifndef PRINT_RELEASE
 					AT_PRINTF("Wrong power level \r\n");
@@ -2868,7 +2862,7 @@ ATEerror_t AT_Cw_set(const char *param)
 			break;
 
 		default:
-		    if (power < 0 || power > 7)
+		    if (power < 0 || power > 16)
 			{
 				#ifndef PRINT_RELEASE
 					AT_PRINTF("Wrong power level \r\n");
@@ -3040,79 +3034,18 @@ ATEerror_t AT_test_set_config(const char *param) //modifica
 	}
 	else
 	{
-	if (150000000 < freq && freq < 960000000)
-	{
-		test_param.freq = freq;
+		if (150000000 < freq && freq < 960000000)
+		{
+			test_param.freq = freq;
+		}
+		else
+		{
+			#ifndef PRINT_RELEASE
+				AT_PRINTF("wrong frequency\r\n");
+			#endif
+			return AT_ERROR;
+		}
 	}
-	else
-	{
-		#ifndef PRINT_RELEASE
-			AT_PRINTF("wrong frequency\r\n");
-		#endif
-		return AT_ERROR;
-	}
-	}
-
-	/* 2: power check and set */
-//    switch(region)
-//	{
-//
-//		case LORAMAC_REGION_EU868:
-//			if (power < 0 || power > 7)
-//			{
-//				#ifndef PRINT_RELEASE
-//					AT_PRINTF("Wrong power level \r\n");
-//				#endif
-//				return AT_ERROR;
-//			}
-//			else
-//			{
-//				test_param.power = power;
-//			}
-//			break;
-//
-//		case LORAMAC_REGION_US915:
-//		    if (power < 0 || power > 14)
-//			{
-//				#ifndef PRINT_RELEASE
-//					AT_PRINTF("Wrong power level \r\n");
-//				#endif
-//				return AT_ERROR;
-//			}
-//		    else
-//		    {
-//		    	test_param.power = power;
-//		    }
-//			break;
-//
-//		case LORAMAC_REGION_AU915:
-//		    if (power < 0 || power > 14)
-//			{
-//				#ifndef PRINT_RELEASE
-//					AT_PRINTF("Wrong power level \r\n");
-//				#endif
-//				return AT_ERROR;
-//			}
-//		    else
-//		    {
-//		    	test_param.power = power;
-//		    }
-//			break;
-//
-//		default:
-//		    if (power < 0 || power > 7)
-//			{
-//				#ifndef PRINT_RELEASE
-//					AT_PRINTF("Wrong power level \r\n");
-//				#endif
-//				return AT_ERROR;
-//			}
-//		    else
-//		    {
-//		    	test_param.power = power;
-//		    }
-//			break;
-//	}
 
 	if ((power >= -9) && (power <= 22))
 	{
@@ -3232,10 +3165,15 @@ ATEerror_t AT_test_tx(const char *param)
 	uint32_t freq_send;
 	uint32_t loraSf;
 	uint32_t bandwidth,bandwidth_rx;
+	uint8_t payload[256], app, app2;
+	uint16_t bufSize = strlen(param);
+	unsigned size = 0;
+	int8_t i;
+	uint32_t payload_length = 0;
 
 	testParameter_t test_param;
 
-	if (4 != tiny_sscanf(buf, "%u:%u:%u:%u", &nb_packet,&freq_send,&loraSf,&bandwidth_rx))
+	if (5 != tiny_sscanf(buf, "%u:%u:%u:%u:%lu", &nb_packet,&freq_send,&loraSf,&bandwidth_rx,&payload_length))
 	{
 		#ifndef PRINT_RELEASE
 			AT_PRINTF("AT+TTX: Some parameter missing\r\n");
@@ -3248,22 +3186,22 @@ ATEerror_t AT_test_tx(const char *param)
 	/*if freq is set in MHz, convert to Hz*/
 	if (150 < freq_send && freq_send < 960)
 	{
-	/*given in MHz*/
-	test_param.freq = freq_send * 1000000;
+		/*given in MHz*/
+		test_param.freq = freq_send * 1000000;
 	}
 	else
 	{
-	if (150000000 < freq_send && freq_send < 960000000)
-	{
-		test_param.freq = freq_send;
-	}
-	else
-	{
-		#ifndef PRINT_RELEASE
-			AT_PRINTF("wrong frequency\r\n");
-		#endif
-		return AT_ERROR;
-	}
+		if (150000000 < freq_send && freq_send < 960000000)
+		{
+			test_param.freq = freq_send;
+		}
+		else
+		{
+			#ifndef PRINT_RELEASE
+				AT_PRINTF("wrong frequency\r\n");
+			#endif
+			return AT_ERROR;
+		}
 	}
 
 	if (nb_packet == 0)
@@ -3300,6 +3238,57 @@ ATEerror_t AT_test_tx(const char *param)
 		return AT_ERROR;
 	}
 
+	if (payload_length > 256)
+	{
+		#ifndef PRINT_RELEASE
+			AT_PRINTF("Payload length greater than maximum admitted\r\n");
+		#endif
+		return AT_ERROR;
+	}
+
+	for(i=0;i<5;i++) //skip ttx parameters
+	{
+		/* skip the payload length */
+		while (('0' <= buf[0]) && (buf[0] <= '9') && bufSize > 1)
+		{
+			buf ++;
+			bufSize --;
+		}
+
+		if ((bufSize == 0) || (':' != buf[0]))
+		{
+			#ifndef PRINT_RELEASE
+				AT_PRINTF("AT+TTX missing : character after payload length\r\n");
+			#endif
+			return AT_ERROR;
+		}
+		else
+		{
+			/* skip the char ':' */
+			buf ++;
+			bufSize --;
+		}
+	}
+
+	i = 0;
+	while ((size < payload_length) && (bufSize > 1))
+	{
+		if(!(((buf[size * 2])>=48 && (buf[size * 2]) <= 57) || ((buf[size * 2])>=65 && buf[size * 2] <= 70) || (buf[size * 2]>=97 && buf[size * 2] <= 102)))
+		{
+			return AT_ERROR;
+		}
+		if(!(((buf[size * 2 + 1])>=48 && (buf[size * 2 + 1]) <= 57) || ((buf[size * 2 + 1])>=65 && buf[size * 2 + 1] <= 70) || (buf[size * 2 + 1]>=97 && buf[size * 2 + 1] <= 102)))
+		{
+			return AT_ERROR;
+		}
+		app = (buf[size * 2]<='9') ? (buf[size * 2]-'0') : (buf[size * 2]-'A'+10) ;
+		app2 = (buf[size * 2 + 1]<='9') ? (buf[size * 2 + 1]-'0') : (buf[size * 2 + 1]-'A'+10) ;
+		payload[i++] = ((app & 0x0F) << 4) | (app2 & 0x0F);
+		size++;
+		bufSize -= 1;
+	}
+
+	test_param.payloadLen = payload_length; 
 	test_param.bandwidth = bandwidth;
 	/*increment frequency*/
 	 /*Set new config*/
@@ -3308,7 +3297,7 @@ ATEerror_t AT_test_tx(const char *param)
 		APP_TPRINTF("Tx at -- %dMz -- of %d packets\r\n", test_param.freq,nb_packet);
 	#endif
 
-	if (0U == TST_TX_Start(nb_packet))
+	if (0U == TST_TX_Start(nb_packet, payload))
 	{
 		return AT_OK;
 	}
@@ -3468,6 +3457,8 @@ ATEerror_t AT_test_tx_hopping(const char *param)
 	testParameter_t test_param;
 	uint32_t hop_freq;
 
+	uint8_t payload_hop = 1;
+
 	if (4 != tiny_sscanf(buf, "%u:%u:%u:%u", &freq_start, &freq_stop, &delta_f, &nb_tx))
 	{
 		return AT_ERROR;
@@ -3516,14 +3507,17 @@ ATEerror_t AT_test_tx_hopping(const char *param)
 
 		/*increment frequency*/
 		test_param.freq = hop_freq;
+
+		test_param.payloadLen = 1; 
+
 		/*Set new config*/
 		TST_set_config(&test_param);
 
 		#ifndef PRINT_RELEASE
-			APP_TPRINTF("Tx Hop at %dHz. %d of %d\r\n", hop_freq, i, nb_tx);
+			APP_TPRINTF("Tx Hop at %dHz. %d of %d\r\n", hop_freq, i+1, nb_tx);
 		#endif
 
-		if (0U != TST_TX_Start(1))
+		if (0U != TST_TX_Start(1, &payload_hop))
 		{
 			return AT_BUSY_ERROR;
 		}

@@ -34,7 +34,6 @@
 #include "radio_conf.h"
 #include "radio_driver.h" 
 #include "mw_log_conf.h"
-
 /* External variables ---------------------------------------------------------*/
 /*!
  * \brief Sughz handler

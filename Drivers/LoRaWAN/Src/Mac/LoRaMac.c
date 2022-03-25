@@ -1290,7 +1290,16 @@ static void HandleRadioRxErrorTimeout( LoRaMacEventInfoStatus_t rx1EventInfoStat
     {
         if( MacCtx.RxSlot == RX_SLOT_WIN_1 )
         {
-        	is_rx2_elapsed = false;
+        	if (rx2_already_closed == true)
+        	{
+        		is_rx2_elapsed = true;
+        		rx2_already_closed = false;
+        	}
+        	else
+        	{
+        		is_rx2_elapsed = false;
+        	}
+
             if( MacCtx.NodeAckRequested == true )
             {
                 MacCtx.McpsConfirm.Status = rx1EventInfoStatus;
@@ -1726,6 +1735,7 @@ static void OnRxWindow2TimerEvent( void* context )
     // If yes, we don't setup the Rx2 window.
     if( MacCtx.RxSlot == RX_SLOT_WIN_1 )
     {
+    	rx2_already_closed = true;
         return;
     }
     MacCtx.RxWindow2Config.Channel = MacCtx.Channel;
@@ -2972,7 +2982,6 @@ static LoRaMacStatus_t SetTxContinuousWave( uint16_t timeout )
 static LoRaMacStatus_t SetTxContinuousWave1( uint16_t timeout, uint32_t frequency, uint8_t power )
 {
     Radio.SetTxContinuousWave( frequency, power, timeout );
-
     MacCtx.MacState |= LORAMAC_TX_RUNNING;
 
     return LORAMAC_STATUS_OK;
