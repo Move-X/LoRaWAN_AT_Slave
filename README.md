@@ -1,6 +1,6 @@
 # LoRaWAN® end-device example project, v1.1
 ​
-![Alt text](/Docs/move-x_logo.png?raw=true)
+![Alt text](/Docs/move-x_logo_2.png?raw=true)
     
 ## AT DOCUMENTATION
 ​
